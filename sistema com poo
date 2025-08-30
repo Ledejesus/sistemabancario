@@ -1,0 +1,96 @@
+import textwrap
+
+class Cliente:
+    def __init__(self, nome):
+        self.nome = nome
+
+class Conta:
+    def __init__(self, cliente, saldo=0, limite=500):
+        self._cliente = cliente
+        self._saldo = saldo
+        self._limite = limite
+        self._extrato = ""
+        self._numero_saques = 0
+        self._LIMITE_SAQUES = 3
+
+    @property
+    def saldo(self):
+        return self._saldo
+
+    @property
+    def extrato(self):
+        return self._extrato
+
+    def sacar(self, valor):
+        excedeu_saldo = valor > self.saldo
+        excedeu_limite = valor > self._limite
+        excedeu_saques = self._numero_saques >= self._LIMITE_SAQUES
+
+        if excedeu_saldo:
+            print("\n@@@ Operação falhou! Você não tem saldo suficiente. @@@")
+        elif excedeu_limite:
+            print("\n@@@ Operação falhou! O valor do saque excede o limite. @@@")
+        elif excedeu_saques:
+            print("\n@@@ Operação falhou! Número máximo de saques excedido. @@@")
+        elif valor > 0:
+            self._saldo -= valor
+            self._extrato += f"Saque:\t\t\t\tR$ {valor:.2f}\n"
+            self._numero_saques += 1
+            print("\n=== Saque realizado com sucesso! ===")
+            return True
+        else:
+            print("\n@@@ Operação falhou! O valor informado é inválido. @@@")
+
+        return False
+
+    def depositar(self, valor):
+        if valor > 0:
+            self._saldo += valor
+            self._extrato += f"Depósito:\t\t\tR$ {valor:.2f}\n"
+            print("\n=== Depósito realizado com sucesso! ===")
+        else:
+            print("\n@@@ Operação falhou! O valor informado é inválido. @@@")
+            return False
+        return True
+
+    def ver_extrato(self):
+        print("\n================ EXTRATO ================")
+        print("Não foram realizadas movimentações." if not self.extrato else self.extrato)
+        print(f"\nSaldo:\t\t\t\tR$ {self.saldo:.2f}")
+        print("==========================================")
+
+def menu():
+    return input(textwrap.dedent("""
+    [d] Depositar
+    [s] Sacar
+    [e] Extrato
+    [q] Sair
+    => """))
+
+def main():
+    cliente1 = Cliente("João da Silva")
+    conta_principal = Conta(cliente1)
+
+    while True:
+        opcao = menu()
+
+        if opcao == "d":
+            valor = float(input("Informe o valor do depósito: "))
+            conta_principal.depositar(valor)
+        
+        elif opcao == "s":
+            valor = float(input("Informe o valor do saque: "))
+            conta_principal.sacar(valor)
+
+        elif opcao == "e":
+            conta_principal.ver_extrato()
+
+        elif opcao == "q":
+            print("Obrigado por usar nosso sistema bancário. Até logo!")
+            break
+
+        else:
+            print("\n@@@ Operação inválida, por favor selecione a operação desejada. @@@")
+
+if __name__ == "__main__":
+    main()
